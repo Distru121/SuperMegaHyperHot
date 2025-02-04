@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.UI;
+using UnityEngine.UI;
+using TMPro;
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
@@ -10,14 +13,15 @@ public class PlayerMove : MonoBehaviour
 
     public float walkSpeed = 6.0f;
     public float runSpeed = 12.0f;
-    public float mouseSensitivity = 100.0f;
+    public float mouseSensitivity = 60.0f;
     public float xRotation = 0;
+
 
     private void Update()
     {
         MovePlayer();
         CameraMotion();
-        Interact();
+        //Interact();
     }
 
     void MovePlayer()
@@ -52,40 +56,53 @@ public class PlayerMove : MonoBehaviour
 
 
 
-    //
-    InteractableComponent storedComponent = null;
+    //the components storing logic
+    InteractableComponent[] storedComponents = null;
+    public TMP_Text uiList;
 
     void Interact()
     {
         if(Input.GetKeyDown(KeyCode.Mouse0))
         {
-            storedComponent = TryGettingAComponentAtMousePos();
+            storedComponents = TryGettingAllComponentsAtMousePos();
+            string uiListOfComponents = "";
 
-            if (storedComponent != null)
-                print(storedComponent.name);
+            if (storedComponents != null)
+            {
+                foreach (InteractableComponent component in storedComponents)
+                {
+                    print(component.name);
+                    uiListOfComponents += component.name + "\n";
+                }
+            }
             else
                 print("No component selected.");
+
+            uiList.text = uiListOfComponents;
         }
     }
-    InteractableComponent TryGettingAComponentAtMousePos()
+    InteractableComponent[] TryGettingAllComponentsAtMousePos()
     {
         Ray ray;
         RaycastHit hit;
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, 100))
         {
             if (Input.GetMouseButtonDown(0))
                 print(hit.collider.name);
         }
 
         //if u already have a stored component and clicking something that has not, it gains that component
-        if(hit.collider.gameObject.GetComponent<InteractableComponent>() == null && storedComponent != null)
+        if(hit.collider.gameObject.GetComponent<InteractableComponent>() == null && storedComponents != null)
         {
-            storedComponent.CloneTo(hit.collider.gameObject);
-            Destroy(storedComponent);
+            foreach(InteractableComponent component in storedComponents)
+            {
+                component.CloneTo(hit.collider.gameObject);
+                Destroy(component);
+            }
             return null;
         }
 
-        return hit.collider.gameObject.GetComponent<InteractableComponent>();
+        return hit.collider.gameObject.GetComponents<InteractableComponent>();
     }
 }

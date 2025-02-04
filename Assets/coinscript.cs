@@ -10,7 +10,6 @@ public class coinscript : InteractableComponent
         clonedscript.particlesystem = particlesystem;
     }
 
-
     public GameObject particlesystem;
 
     private void OnTriggerEnter(Collider other)
